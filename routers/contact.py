@@ -46,7 +46,7 @@ def update(Id:int,response:Response,request : schemas.ContactSchema,db:Session =
     contacts.contactnum=request.contactnum
     
     db.commit()
-    return {"Updated"}
+    return {"Updated Successfully"}
 
 @router.delete('')
 def delete (Id:int,response:Response,db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):

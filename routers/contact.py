@@ -2,6 +2,7 @@ from typing import List
 from fastapi import APIRouter,Depends,status,Response
 from sqlalchemy.orm  import Session
 import schemas,database,models
+from . import oauth2 
 get_db= database.get_db
 
 router = APIRouter(
@@ -10,12 +11,12 @@ router = APIRouter(
 )
 
 @router.get('',response_model=List[schemas.ContactSchemaGet])
-def all (db:Session = Depends(get_db)):
+def all (db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):
     contacts = db.query(models.Contact).all()
     return contacts
 
 @router.post('',status_code=status.HTTP_201_CREATED)
-def create (User_Id:int,request : schemas.ContactSchema,db:Session = Depends(get_db)):
+def create (User_Id:int,request : schemas.ContactSchema,db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):
     new_contact= models.Contact(name=request.name,country=request.country,contactnum=request.contactnum,user_id = User_Id)
     User = db.query(models.User).filter(models.User.id==User_Id).first()
     if not User:
@@ -26,7 +27,7 @@ def create (User_Id:int,request : schemas.ContactSchema,db:Session = Depends(get
     return new_contact 
 
 @router.get('/id',response_model=schemas.ContactSchema)
-def get_one (Id:int,response:Response,db:Session = Depends(get_db)):
+def get_one (Id:int,response:Response,db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):
     contacts = db.query(models.Contact).filter(models.Contact.id==Id).first()
     if not contacts:
         response.status_code=status.HTTP_404_NOT_FOUND
@@ -35,7 +36,7 @@ def get_one (Id:int,response:Response,db:Session = Depends(get_db)):
     return contacts
 
 @router.put('')
-def update(Id:int,response:Response,request : schemas.ContactSchema,db:Session = Depends(get_db)):
+def update(Id:int,response:Response,request : schemas.ContactSchema,db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):
     contacts = db.query(models.Contact).filter(models.Contact.id==Id).first()
     if not contacts:
         response.status_code=status.HTTP_404_NOT_FOUND
@@ -48,7 +49,7 @@ def update(Id:int,response:Response,request : schemas.ContactSchema,db:Session =
     return {"Updated"}
 
 @router.delete('')
-def delete (Id:int,response:Response,db:Session = Depends(get_db)):
+def delete (Id:int,response:Response,db:Session = Depends(get_db),current_user:schemas.ContactSchema=Depends(oauth2.get_current_user)):
     contacts = db.query(models.Contact).filter(models.Contact.id==Id).first()
     if not contacts:
         response.status_code=status.HTTP_404_NOT_FOUND

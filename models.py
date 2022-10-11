@@ -20,5 +20,5 @@ class User(Base):
     name=Column(String,unique=True)
     email=Column(String) 
     password = Column(String)
-    
+
     creator = relationship("Contact", back_populates="creation")
